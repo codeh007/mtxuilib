@@ -1,0 +1,15 @@
+{
+  "name": "mtxuilib",
+  "version": "0.8.35",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && npm run copy-styles",
+    "copy-styles": "mkdir -p dist/styles && cp -r src/styles/* dist/styles/",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:smoke": "tsc -p tsconfig.smoke.json --noEmit"
+  }
+}

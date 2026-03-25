@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "moduleResolution": "Classic"
+  },
+  "include": ["tests/smoke/public-imports.tsx"]
+}

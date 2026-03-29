@@ -2,58 +2,59 @@ name: publish
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'package.json'
-      - 'tsconfig.json'
-      - '.github/workflows/publish.yml'
+    tags:
+      - "v*.*.*"
 
 permissions:
   contents: write
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   publish:
-    if: ${{ !contains(github.event.head_commit.message, '[skip release]') }}
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
           cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Verify tag matches package version
+        run: |
+          package_version="$(node -p "require('./package.json').version")"
+          expected_tag="v${package_version}"
+
+          if [ "${GITHUB_REF_NAME}" != "${expected_tag}" ]; then
+            echo "tag ${GITHUB_REF_NAME} does not match package.json version ${expected_tag}" >&2
+            exit 1
+          fi
 
       - run: npm ci
-      - run: npm run build
-      - run: npm pack --dry-run
+      - run: npm run check
 
-      - name: Bump patch version
-        id: version
+      - name: Pack npm tarball
+        id: pack
         run: |
-          npm version patch --no-git-tag-version
-          echo "value=v$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
-          echo "number=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
-
-      - name: Commit version bump
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add package.json
-          git commit -m "chore(release): ${{ steps.version.outputs.value }} [skip release]"
-          git tag "${{ steps.version.outputs.value }}"
-          git push origin main --follow-tags
+          mkdir -p .artifacts
+          tarball="$(npm pack --pack-destination .artifacts)"
+          echo "tarball=.artifacts/${tarball}" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npm
-        run: npm publish --access public
+        run: npm publish "${{ steps.pack.outputs.tarball }}" --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.value }}
+          tag_name: ${{ github.ref_name }}
+          files: ${{ steps.pack.outputs.tarball }}
           generate_release_notes: true

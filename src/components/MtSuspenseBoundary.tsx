@@ -5,8 +5,8 @@ import type { FallbackProps } from "react-error-boundary";
 import { InlineLoading } from "../mt/skeletons";
 
 interface MtSuspenseBoundaryProps {
-  suspenseFallback?: ReactNode;
-  errorFallbackRender?: (props: FallbackProps) => ReactNode;
+	suspenseFallback?: ReactNode;
+	errorFallbackRender?: (props: FallbackProps) => ReactNode;
 }
 
 /**
@@ -14,6 +14,12 @@ interface MtSuspenseBoundaryProps {
  * @param props
  * @returns
  */
-export const MtSuspenseBoundary = (props: PropsWithChildren<MtSuspenseBoundaryProps>) => {
-  return <Suspense fallback={props.suspenseFallback || <InlineLoading />}>{props.children}</Suspense>;
+export const MtSuspenseBoundary = (
+	props: PropsWithChildren<MtSuspenseBoundaryProps>,
+) => {
+	return (
+		<Suspense fallback={props.suspenseFallback || <InlineLoading />}>
+			{props.children}
+		</Suspense>
+	);
 };

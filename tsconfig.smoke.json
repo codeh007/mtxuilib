@@ -1,8 +1,12 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "noEmit": true,
-    "moduleResolution": "Classic"
-  },
-  "include": ["tests/smoke/public-imports.tsx"]
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"noEmit": true,
+		"paths": {
+			"mtxuilib": ["./src/index.ts"],
+			"mtxuilib/*": ["./src/*"]
+		}
+	},
+	"include": ["tests/smoke/public-imports.tsx"]
 }

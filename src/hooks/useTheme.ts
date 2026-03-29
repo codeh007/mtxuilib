@@ -3,46 +3,49 @@ import { useEffect, useState } from "react";
 type Theme = "light" | "dark" | "system";
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("theme") as Theme) || "system";
-    }
-    return "system";
-  });
+	const [theme, setTheme] = useState<Theme>(() => {
+		if (typeof window !== "undefined") {
+			return (localStorage.getItem("theme") as Theme) || "system";
+		}
+		return "system";
+	});
 
-  useEffect(() => {
-    const root = window.document.documentElement;
+	useEffect(() => {
+		const root = window.document.documentElement;
 
-    root.classList.remove("light", "dark");
+		root.classList.remove("light", "dark");
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+		if (theme === "system") {
+			const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+				.matches
+				? "dark"
+				: "light";
 
-      root.classList.add(systemTheme);
-      return;
-    }
+			root.classList.add(systemTheme);
+			return;
+		}
 
-    root.classList.add(theme);
-  }, [theme]);
+		root.classList.add(theme);
+	}, [theme]);
 
-  const setThemeValue = (theme: Theme) => {
-    localStorage.setItem("theme", theme);
-    setTheme(theme);
-  };
+	const setThemeValue = (theme: Theme) => {
+		localStorage.setItem("theme", theme);
+		setTheme(theme);
+	};
 
-  const toggleTheme = () => {
-    if (theme === "light") {
-      setThemeValue("dark");
-    } else if (theme === "dark") {
-      setThemeValue("light");
-    } else {
-      setThemeValue("light");
-    }
-  };
+	const toggleTheme = () => {
+		if (theme === "light") {
+			setThemeValue("dark");
+		} else if (theme === "dark") {
+			setThemeValue("light");
+		} else {
+			setThemeValue("light");
+		}
+	};
 
-  return {
-    theme,
-    setTheme: setThemeValue,
-    toggleTheme,
-  };
+	return {
+		theme,
+		setTheme: setThemeValue,
+		toggleTheme,
+	};
 }

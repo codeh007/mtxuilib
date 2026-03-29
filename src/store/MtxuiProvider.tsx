@@ -16,66 +16,70 @@ import { SonnerToaster } from "../ui/sonner";
 
 type MtxuiProps = {};
 export interface MtxuiState extends MtxuiProps {
-  _hasHydrated?: boolean;
+	_hasHydrated?: boolean;
 }
 
-const createAppSlice: StateCreator<MtxuiState, [], [], MtxuiState> = (set, _get, init) => {
-  return {
-    ...init,
-    setHasHydrated: (_hasHydrated: boolean) => set({ _hasHydrated }),
-  };
+const createAppSlice: StateCreator<MtxuiState, [], [], MtxuiState> = (
+	set,
+	_get,
+	init,
+) => {
+	return {
+		...init,
+		setHasHydrated: (_hasHydrated: boolean) => set({ _hasHydrated }),
+	};
 };
 
 type mtappStore = ReturnType<typeof createMtxuitore>;
 type MainStoreState = MtxuiState;
 
 const createMtxuitore = (initProps?: Partial<MainStoreState>) => {
-  const initialState = { ...initProps };
-  return createStore<MainStoreState>()(
-    subscribeWithSelector(
-      devtools(
-        immer((...a) => ({
-          ...createAppSlice(...a),
-          ...initialState,
-        })),
-        {
-          name: "Mtxui-store",
-        },
-      ),
-    ),
-  );
+	const initialState = { ...initProps };
+	return createStore<MainStoreState>()(
+		subscribeWithSelector(
+			devtools(
+				immer((...a) => ({
+					...createAppSlice(...a),
+					...initialState,
+				})),
+				{
+					name: "Mtxui-store",
+				},
+			),
+		),
+	);
 };
 const _context = createContext<mtappStore | null>(null);
 
 type AppProviderProps = React.PropsWithChildren<MtxuiProps>;
 export const MtxuiProvider = (props: AppProviderProps) => {
-  const { children, ...etc } = props;
-  const etcRef = useRef(etc);
-  etcRef.current = etc;
+	const { children, ...etc } = props;
+	const etcRef = useRef(etc);
+	etcRef.current = etc;
 
-  const mystore = useMemo(() => {
-    return createMtxuitore(etcRef.current);
-  }, []);
+	const mystore = useMemo(() => {
+		return createMtxuitore(etcRef.current);
+	}, []);
 
-  return (
-    <_context.Provider value={mystore}>
-      <DebugProvider>
-        <ThemeProvider>
-          <TooltipProvider delayDuration={200}>
-            <ConfirmProvider>
-              <ActiveThemeProvider>{children}</ActiveThemeProvider>
-            </ConfirmProvider>
-            <TailwindIndicator />
-            <SonnerToaster position="top-center" richColors closeButton />
-          </TooltipProvider>
-        </ThemeProvider>
-      </DebugProvider>
-    </_context.Provider>
-  );
+	return (
+		<_context.Provider value={mystore}>
+			<DebugProvider>
+				<ThemeProvider>
+					<TooltipProvider delayDuration={200}>
+						<ConfirmProvider>
+							<ActiveThemeProvider>{children}</ActiveThemeProvider>
+						</ConfirmProvider>
+						<TailwindIndicator />
+						<SonnerToaster position="top-center" richColors closeButton />
+					</TooltipProvider>
+				</ThemeProvider>
+			</DebugProvider>
+		</_context.Provider>
+	);
 };
 
 export function useMtxui(): MainStoreState {
-  const store = useContext(_context);
-  if (!store) throw new Error("useMtxui must be used within MtxuiProvider");
-  return useStore(store);
+	const store = useContext(_context);
+	if (!store) throw new Error("useMtxui must be used within MtxuiProvider");
+	return useStore(store);
 }
